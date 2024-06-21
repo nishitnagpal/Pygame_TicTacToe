@@ -1,122 +1,123 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-const WIDTH = 800, HEIGHT = 600;
-const ROWS = 3, COLS = 3;
-const SQUARE_SIZE = 100;
-
-const WHITE = 'rgb(255, 255, 255)';
-const BLACK = 'rgb(0, 0, 0)';
-const GREEN = 'rgb(0, 255, 0)';
-const BLUE = 'rgb(0, 0, 255)';
-const LIGHT_BLUE = 'rgb(173, 216, 230)';
-
-let squares = Array.from({ length: ROWS }, () => Array(COLS).fill(''));
-let currentPlayer = "X";
 let gameStarted = false;
 let gameResult = false;
-let option1 = false;
-let option2 = false;
+let currentPlayer = 'X';
 let isPlayerTurn = Math.random() < 0.5;
-let computerMoveDelay = 1000;  // milliseconds
+let squares = [['', '', ''], ['', '', ''], ['', '', '']];
+let gameOverMessage = '';
 let computerMoveTime = 0;
 let pendingComputerMove = false;
 
-function drawGrid() {
-    ctx.fillStyle = BLACK;
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+const ROWS = 3;
+const COLS = 3;
+const SQUARE_SIZE = 100;
 
-    const start_x = (WIDTH - COLS * SQUARE_SIZE) / 2;
-    const start_y = (HEIGHT - ROWS * SQUARE_SIZE) / 2;
+function resetGame() {
+    gameStarted = false;
+    gameResult = false;
+    currentPlayer = 'X';
+    isPlayerTurn = Math.random() < 0.5;
+    squares = [['', '', ''], ['', '', ''], ['', '', '']];
+    gameOverMessage = '';
+}
+
+function drawGrid() {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, 800, 600);
+
+    const startX = (800 - 3 * 100) / 2;
+    const startY = (600 - 3 * 100) / 2;
 
     if (gameStarted) {
-        for (let row = 0; row < ROWS; row++) {
-            for (let col = 0; col < COLS; col++) {
-                ctx.strokeStyle = WHITE;
-                ctx.strokeRect(start_x + col * SQUARE_SIZE, start_y + row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 3; col++) {
+                ctx.strokeStyle = 'white';
+                ctx.strokeRect(startX + col * 100, startY + row * 100, 100, 100);
 
                 if (squares[row][col] !== '') {
-                    ctx.fillStyle = squares[row][col] === 'X' ? GREEN : BLUE;
-                    ctx.font = "48px sans-serif";
-                    ctx.fillText(squares[row][col], start_x + col * SQUARE_SIZE + SQUARE_SIZE / 3, start_y + row * SQUARE_SIZE + SQUARE_SIZE / 1.5);
+                    ctx.fillStyle = squares[row][col] === 'X' ? 'green' : 'blue';
+                    ctx.font = '48px sans-serif';
+                    ctx.fillText(squares[row][col], startX + col * 100 + 33, startY + row * 100 + 67);
                 }
             }
         }
+    } else {
+        ctx.fillStyle = 'blue';
+        ctx.fillRect(800 / 5, 600 / 3, 200, 100);
+        ctx.strokeStyle = 'lightblue';
+        ctx.strokeRect(800 / 5, 600 / 3, 200, 100);
+        ctx.fillRect(800 / 2, 600 / 3, 200, 100);
+        ctx.strokeRect(800 / 2, 600 / 3, 200, 100);
+
+        ctx.fillStyle = 'white';
+        ctx.font = '20px Comic Sans MS';
+        ctx.fillText('Play with computer', 800 / 5 + 100, 600 / 3 + 50);
+        ctx.fillText('2 Players Game', 800 / 2 + 100, 600 / 3 + 50);
+        ctx.fillText('Please select an option to play', 800 / 2, 600 / 6);
     }
 
-    if (!gameStarted && !gameResult) {
-        drawOptionButton(WIDTH / 5, HEIGHT / 3, "Play with computer");
-        drawOptionButton(WIDTH / 2, HEIGHT / 3, "2 Players Game");
-
-        drawText("Please select an option to play", WIDTH / 2, HEIGHT / 6, WHITE, "20px Comic Sans MS");
+    if (gameOverMessage) {
+        ctx.fillStyle = 'green';
+        ctx.font = '48px sans-serif';
+        ctx.fillText(gameOverMessage, 800 / 2, 600 / 2);
+    } else if (gameStarted) {
+        ctx.fillStyle = 'white';
+        ctx.font = '20px Comic Sans MS';
+        ctx.fillText(gameStarted && isPlayerTurn ? "Player's Turn" : "Computer's Turn", 800 / 2, 600 / 6);
     }
-
-    if (option1 && !gameResult && gameStarted) {
-        drawText(isPlayerTurn ? "Player's Turn" : "Computer's Turn", WIDTH / 2, HEIGHT / 6, WHITE, "20px Comic Sans MS");
-    } else if (option2 && !gameResult && gameStarted) {
-        drawText(isPlayerTurn ? "Player 1's Turn" : "Player 2's Turn", WIDTH / 2, HEIGHT / 6, WHITE, "20px Comic Sans MS");
-    }
-}
-
-function drawOptionButton(x, y, text) {
-    ctx.fillStyle = BLUE;
-    ctx.fillRect(x, y, 200, 100);
-    ctx.strokeStyle = LIGHT_BLUE;
-    ctx.strokeRect(x, y, 200, 100);
-
-    drawText(text, x + 100, y + 50, WHITE, "20px Comic Sans MS");
-}
-
-function drawText(text, x, y, color, font) {
-    ctx.fillStyle = color;
-    ctx.font = font;
-    ctx.textAlign = 'center';
-    ctx.fillText(text, x, y);
 }
 
 function getGridPosition(x, y) {
-    const start_x = (WIDTH - COLS * SQUARE_SIZE) / 2;
-    const start_y = (HEIGHT - ROWS * SQUARE_SIZE) / 2;
+    const totalGridWidth = COLS * SQUARE_SIZE;
+    const totalGridHeight = ROWS * SQUARE_SIZE;
+    const startX = (800 - totalGridWidth) / 2;
+    const startY = (600 - totalGridHeight) / 2;
 
-    if (start_x <= x && x <= start_x + COLS * SQUARE_SIZE && start_y <= y && y <= start_y + ROWS * SQUARE_SIZE) {
-        const col = Math.floor((x - start_x) / SQUARE_SIZE);
-        const row = Math.floor((y - start_y) / SQUARE_SIZE);
-        return { row, col };
+    if (startX <= x <= startX + totalGridWidth && startY <= y <= startY + totalGridHeight) {
+        const col = Math.floor((x - startX) / SQUARE_SIZE);
+        const row = Math.floor((y - startY) / SQUARE_SIZE);
+        return [row, col];
     }
-    return null;
+    return [null, null];
 }
 
-function checkWinner(board) {
+function checkWinner() {
     for (let i = 0; i < ROWS; i++) {
-        if (board[i][0] === board[i][1] && board[i][1] === board[i][2] && board[i][0] !== '') {
-            return board[i][0];
+        if (squares[i][0] === squares[i][1] && squares[i][1] === squares[i][2] && squares[i][0] !== '') {
+            return squares[i][0];
         }
-        if (board[0][i] === board[1][i] && board[1][i] === board[2][i] && board[0][i] !== '') {
-            return board[0][i];
+        if (squares[0][i] === squares[1][i] && squares[1][i] === squares[2][i] && squares[0][i] !== '') {
+            return squares[0][i];
         }
     }
-    if (board[0][0] === board[1][1] && board[1][1] === board[2][2] && board[0][0] !== '') {
-        return board[0][0];
+    if (squares[0][0] === squares[1][1] && squares[1][1] === squares[2][2] && squares[0][0] !== '') {
+        return squares[0][0];
     }
-    if (board[0][2] === board[1][1] && board[1][1] === board[2][0] && board[0][2] !== '') {
-        return board[0][2];
+    if (squares[0][2] === squares[1][1] && squares[1][1] === squares[2][0] && squares[0][2] !== '') {
+        return squares[0][2];
     }
     return null;
 }
 
-function isBoardFull(board) {
-    return board.flat().every(cell => cell !== '');
+function isBoardFull() {
+    for (let row of squares) {
+        for (let cell of row) {
+            if (cell === '') {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 function computerMove() {
-    let madeMove = false;
-
-    // Check for winning move
     for (let row = 0; row < ROWS; row++) {
         for (let col = 0; col < COLS; col++) {
             if (squares[row][col] === '') {
                 squares[row][col] = currentPlayer;
-                if (checkWinner(squares) === currentPlayer) {
+                if (checkWinner() === currentPlayer) {
                     return;
                 }
                 squares[row][col] = '';
@@ -124,13 +125,12 @@ function computerMove() {
         }
     }
 
-    // Block player's winning move
     const opponent = currentPlayer === 'X' ? 'O' : 'X';
     for (let row = 0; row < ROWS; row++) {
         for (let col = 0; col < COLS; col++) {
             if (squares[row][col] === '') {
                 squares[row][col] = opponent;
-                if (checkWinner(squares) === opponent) {
+                if (checkWinner() === opponent) {
                     squares[row][col] = currentPlayer;
                     return;
                 }
@@ -139,22 +139,21 @@ function computerMove() {
         }
     }
 
-    // Take center if available
     if (squares[1][1] === '') {
         squares[1][1] = currentPlayer;
         return;
     }
 
-    // Take any available corner
-    for (let [row, col] of [[0, 0], [0, 2], [2, 0], [2, 2]]) {
+    const corners = [[0, 0], [0, 2], [2, 0], [2, 2]];
+    for (let [row, col] of corners) {
         if (squares[row][col] === '') {
             squares[row][col] = currentPlayer;
             return;
         }
     }
 
-    // Take any available side
-    for (let [row, col] of [[0, 1], [1, 0], [1, 2], [2, 1]]) {
+    const sides = [[0, 1], [1, 0], [1, 2], [2, 1]];
+    for (let [row, col] of sides) {
         if (squares[row][col] === '') {
             squares[row][col] = currentPlayer;
             return;
@@ -165,96 +164,67 @@ function computerMove() {
 function gameFinal(player, isTie = false) {
     gameResult = true;
     gameStarted = false;
+    gameOverMessage = isTie ? "It's a tie!" : `${player} wins!`;
 
-    ctx.fillStyle = BLACK;
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
-    const resultText = isTie ? "It's a tie!" : `${player} wins!`;
-    drawText(resultText, WIDTH / 2, HEIGHT / 2, GREEN, "48px Comic Sans MS");
-
-    setTimeout(resetGame, 2000);
+    setTimeout(() => {
+        resetGame();
+    }, 2000);
 }
 
-function resetGame() {
-    squares = Array.from({ length: ROWS }, () => Array(COLS).fill(''));
-    currentPlayer = "X";
-    gameStarted = false;
-    gameResult = false;
-    option1 = false;
-    option2 = false;
-    pendingComputerMove = false;
-    isPlayerTurn = Math.random() < 0.5;
-}
-
-function main() {
-    resetGame();
-    drawGrid();
-
-    canvas.addEventListener('mousedown', (event) => {
-        const mouseX = event.offsetX;
-        const mouseY = event.offsetY;
-
-        if (!gameStarted && !gameResult) {
-            const playWithComputerRect = { x: WIDTH / 5, y: HEIGHT / 3, width: 200, height: 100 };
-            const twoPlayersGameRect = { x: WIDTH / 2, y: HEIGHT / 3, width: 200, height: 100 };
-
-            if (isInsideRect(mouseX, mouseY, playWithComputerRect)) {
-                gameStarted = true;
-                option1 = true;
-                isPlayerTurn = Math.random() < 0.5;
-            } else if (isInsideRect(mouseX, mouseY, twoPlayersGameRect)) {
-                gameStarted = true;
-                option2 = true;
-                isPlayerTurn = true;
-            }
-        } else if (option2 || option1 && isPlayerTurn) {
-            const position = getGridPosition(mouseX, mouseY);
-            if (position) {
-                const { row, col } = position;
-                if (squares[row][col] === '') {
-                    squares[row][col] = currentPlayer;
-                    if (checkWinner(squares)) {
-                        gameFinal(currentPlayer);
-                    } else if (isBoardFull(squares)) {
-                        gameFinal(currentPlayer, true);
-                    } else {
-                        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                        isPlayerTurn = !isPlayerTurn;
-
-                        if (option1 && !isPlayerTurn) {
-                            pendingComputerMove = true;
-                            computerMoveTime = performance.now();
-                        }
-                    }
-                }
-            }
+function playerMove(row, col) {
+    if (squares[row][col] === '') {
+        squares[row][col] = currentPlayer;
+        if (checkWinner()) {
+            gameFinal(currentPlayer);
+        } else if (isBoardFull()) {
+            gameFinal(currentPlayer, true);
+        } else {
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            isPlayerTurn = !isPlayerTurn;
+            pendingComputerMove = true;
+            computerMoveTime = performance.now();
         }
-    });
-
-    function gameLoop() {
-        if (option1 && pendingComputerMove && !isPlayerTurn && !gameResult) {
-            if (performance.now() - computerMoveTime > computerMoveDelay) {
-                computerMove();
-                pendingComputerMove = false;
-                if (checkWinner(squares)) {
-                    gameFinal(currentPlayer);
-                } else if (isBoardFull(squares)) {
-                    gameFinal(currentPlayer, true);
-                } else {
-                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                    isPlayerTurn = !isPlayerTurn;
-                }
-            }
-        }
-        drawGrid();
-        requestAnimationFrame(gameLoop);
     }
+}
 
+canvas.addEventListener('mousedown', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+
+    if (!gameStarted && !gameResult) {
+        if (mouseX >= 800 / 5 && mouseX <= 800 / 5 + 200 && mouseY >= 600 / 3 && mouseY <= 600 / 3 + 100) {
+            gameStarted = true;
+            isPlayerTurn = Math.random() < 0.5;
+        } else if (mouseX >= 800 / 2 && mouseX <= 800 / 2 + 200 && mouseY >= 600 / 3 && mouseY <= 600 / 3 + 100) {
+            gameStarted = true;
+            isPlayerTurn = true;
+        }
+    } else if (gameStarted) {
+        const [row, col] = getGridPosition(mouseX, mouseY);
+        if (row !== null && col !== null && (isPlayerTurn || pendingComputerMove)) {
+            playerMove(row, col);
+        }
+    }
+});
+
+function gameLoop() {
+    const currentTime = performance.now();
+    if (pendingComputerMove && !isPlayerTurn && currentTime - computerMoveTime > 1000) {
+        computerMove();
+        pendingComputerMove = false;
+        if (checkWinner()) {
+            gameFinal(currentPlayer);
+        } else if (isBoardFull()) {
+            gameFinal(currentPlayer, true);
+        } else {
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            isPlayerTurn = !isPlayerTurn;
+        }
+    }
+    drawGrid();
     requestAnimationFrame(gameLoop);
 }
 
-function isInsideRect(x, y, rect) {
-    return x >= rect.x && x <= rect.x + rect.width && y >= rect.y && y <= rect.y + rect.height;
-}
-
-main();
+resetGame();
+gameLoop();
