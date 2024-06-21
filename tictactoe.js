@@ -170,7 +170,7 @@ function gameFinal(player, isTie = false) {
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
     const resultText = isTie ? "It's a tie!" : `${player} wins!`;
-    drawText(resultText, WIDTH / 2, HEIGHT / 4, GREEN, "48px Comic Sans MS");
+    drawText(resultText, WIDTH / 2, HEIGHT / 2, GREEN, "48px Comic Sans MS");
 
     setTimeout(resetGame, 2000);
 }
