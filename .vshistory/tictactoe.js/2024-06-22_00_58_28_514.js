@@ -1,28 +1,18 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-const WIDTH = 800, HEIGHT = 600;
-const ROWS = 3, COLS = 3;
-const SQUARE_SIZE = 100;
-
-const WHITE = 'rgb(255, 255, 255)';
-const BLACK = 'rgb(0, 0, 0)';
-const GREEN = 'rgb(0, 255, 0)';
-const BLUE = 'rgb(0, 0, 255)';
-const LIGHT_BLUE = 'rgb(173, 216, 230)';
-
-let squares = Array.from({ length: ROWS }, () => Array(COLS).fill(''));
-let currentPlayer = "X";
 let gameStarted = false;
 let gameResult = false;
-let option1 = false;
-let option2 = false;
+let currentPlayer = 'X';
 let isPlayerTurn = Math.random() < 0.5;
-let computerMoveDelay = 1000;  // milliseconds
+let squares = [['', '', ''], ['', '', ''], ['', '', '']];
+let gameOverMessage = '';
 let computerMoveTime = 0;
 let pendingComputerMove = false;
 
-let gameOverMessage = '';
+const ROWS = 3;
+const COLS = 3;
+const SQUARE_SIZE = 100;
 
 function resetGame() {
     gameStarted = false;
@@ -35,73 +25,62 @@ function resetGame() {
 
 function drawGrid() {
     ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.fillRect(0, 0, 800, 600);
 
-    const start_x = (WIDTH - COLS * SQUARE_SIZE) / 2;
-    const start_y = (HEIGHT - ROWS * SQUARE_SIZE) / 2;
+    const startX = (800 - 3 * 100) / 2;
+    const startY = (600 - 3 * 100) / 2;
 
     if (gameStarted) {
-        for (let row = 0; row < ROWS; row++) {
-            for (let col = 0; col < COLS; col++) {
-                ctx.strokeStyle = WHITE;
-                ctx.strokeRect(start_x + col * SQUARE_SIZE, start_y + row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+        for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 3; col++) {
+                ctx.strokeStyle = 'white';
+                ctx.strokeRect(startX + col * 100, startY + row * 100, 100, 100);
 
                 if (squares[row][col] !== '') {
-                    ctx.fillStyle = squares[row][col] === 'X' ? GREEN : BLUE;
-                    ctx.font = "48px sans-serif";
-                    ctx.fillText(squares[row][col], start_x + col * SQUARE_SIZE + SQUARE_SIZE / 3, start_y + row * SQUARE_SIZE + SQUARE_SIZE / 1.5);
+                    ctx.fillStyle = squares[row][col] === 'X' ? 'green' : 'blue';
+                    ctx.font = '48px sans-serif';
+                    ctx.fillText(squares[row][col], startX + col * 100 + 33, startY + row * 100 + 67);
                 }
             }
         }
+    } else {
+        ctx.fillStyle = 'blue';
+        ctx.fillRect(800 / 5, 600 / 3, 200, 100);
+        ctx.strokeStyle = 'lightblue';
+        ctx.strokeRect(800 / 5, 600 / 3, 200, 100);
+        ctx.fillRect(800 / 2, 600 / 3, 200, 100);
+        ctx.strokeRect(800 / 2, 600 / 3, 200, 100);
+
+        ctx.fillStyle = 'white';
+        ctx.font = '20px Comic Sans MS';
+        ctx.fillText('Play with computer', 800 / 5 + 100, 600 / 3 + 50);
+        ctx.fillText('2 Players Game', 800 / 2 + 100, 600 / 3 + 50);
+        ctx.fillText('Please select an option to play', 800 / 2, 600 / 6);
     }
 
-    if (!gameStarted && !gameResult) {
-        drawOptionButton(WIDTH / 5, HEIGHT / 3, "Play with computer");
-        drawOptionButton(WIDTH / 2, HEIGHT / 3, "2 Players Game");
-
-        drawText("Please select an option to play", WIDTH / 2, HEIGHT / 6, WHITE, "20px Comic Sans MS");
-    }
-
-    if (option1 && !gameResult && gameStarted) {
-        drawText(isPlayerTurn ? "Player's Turn" : "Computer's Turn", WIDTH / 2, HEIGHT / 6, WHITE, "20px Comic Sans MS");
-    } else if (option2 && !gameResult && gameStarted) {
-        drawText(isPlayerTurn ? "Player 1's Turn" : "Player 2's Turn", WIDTH / 2, HEIGHT / 6, WHITE, "20px Comic Sans MS");
-    }
-
-    if (gameResult) {
+    if (gameOverMessage) {
         ctx.fillStyle = 'green';
         ctx.font = '48px sans-serif';
         ctx.fillText(gameOverMessage, 800 / 2, 600 / 2);
+    } else if (gameStarted) {
+        ctx.fillStyle = 'white';
+        ctx.font = '20px Comic Sans MS';
+        ctx.fillText(gameStarted && isPlayerTurn ? "Player's Turn" : "Computer's Turn", 800 / 2, 600 / 6);
     }
 }
-
-function drawOptionButton(x, y, text) {
-    ctx.fillStyle = BLUE;
-    ctx.fillRect(x, y, 200, 100);
-    ctx.strokeStyle = LIGHT_BLUE;
-    ctx.strokeRect(x, y, 200, 100);
-
-    drawText(text, x + 100, y + 50, WHITE, "20px Comic Sans MS");
-}
-
-function drawText(text, x, y, color, font) {
-    ctx.fillStyle = color;
-    ctx.font = font;
-    ctx.textAlign = 'center';
-    ctx.fillText(text, x, y);
-}
-
 
 function getGridPosition(x, y) {
-    const start_x = (WIDTH - COLS * SQUARE_SIZE) / 2;
-    const start_y = (HEIGHT - ROWS * SQUARE_SIZE) / 2;
+    const totalGridWidth = COLS * SQUARE_SIZE;
+    const totalGridHeight = ROWS * SQUARE_SIZE;
+    const startX = (800 - totalGridWidth) / 2;
+    const startY = (600 - totalGridHeight) / 2;
 
-    if (start_x <= x && x <= start_x + COLS * SQUARE_SIZE && start_y <= y && y <= start_y + ROWS * SQUARE_SIZE) {
-        const col = Math.floor((x - start_x) / SQUARE_SIZE);
-        const row = Math.floor((y - start_y) / SQUARE_SIZE);
-        return { row, col };
+    if (startX <= x <= startX + totalGridWidth && startY <= y <= startY + totalGridHeight) {
+        const col = Math.floor((x - startX) / SQUARE_SIZE);
+        const row = Math.floor((y - startY) / SQUARE_SIZE);
+        return [row, col];
     }
-    return null;
+    return [null, null];
 }
 
 function checkWinner() {
