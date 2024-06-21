@@ -22,7 +22,6 @@ let isPlayerTurn = Math.random() < 0.5;
 let computerMoveDelay = 1000;  // milliseconds
 let computerMoveTime = 0;
 let pendingComputerMove = false;
-let gameOverMessage = '';
 
 function drawGrid() {
     ctx.fillStyle = BLACK;
@@ -58,11 +57,6 @@ function drawGrid() {
     } else if (option2 && !gameResult && gameStarted) {
         drawText(isPlayerTurn ? "Player 1's Turn" : "Player 2's Turn", WIDTH / 2, HEIGHT / 6, WHITE, "20px Comic Sans MS");
     }
-
-    if (gameOverMessage) {
-        ctx.fillStyle = 'green';
-        ctx.font = '48px sans-serif';
-        ctx.fillText(gameOverMessage, WIDTH / 2, HEIGHT / 2);
 }
 
 function drawOptionButton(x, y, text) {
@@ -176,16 +170,10 @@ function gameFinal(player, isTie = false) {
     ctx.fillStyle = BLACK;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-    gameOverMessage = isTie ? "It's a tie!" : `${player} wins!`;
+    const resultText = isTie ? "It's a tie!" : `${player} wins!`;
+    drawText(resultText, WIDTH / 2, HEIGHT / 2, GREEN, "48px Comic Sans MS");
 
-    setTimeout(() => {
-        resetGame();
-    }, 2000);
-
-    /*const resultText = isTie ? "It's a tie!" : `${player} wins!`;
-    /*drawText(resultText, WIDTH / 2, HEIGHT / 2, GREEN, "48px Comic Sans MS");
-
-    setTimeout(resetGame, 2000);*/
+    setTimeout(resetGame, 2000);
 }
 
 function resetGame() {
@@ -196,7 +184,6 @@ function resetGame() {
     option1 = false;
     option2 = false;
     pendingComputerMove = false;
-    gameOverMessage = '';
     isPlayerTurn = Math.random() < 0.5;
 }
 
