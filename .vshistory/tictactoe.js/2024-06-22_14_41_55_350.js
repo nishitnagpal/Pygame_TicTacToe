@@ -44,13 +44,13 @@ function drawGrid() {
                 if (squares[row][col] !== '') {
                     ctx.fillStyle = squares[row][col] === 'X' ? 'green' : 'blue';
                     ctx.font = '48px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
                     ctx.fillText(squares[row][col], startX + col * SQUARE_SIZE + SQUARE_SIZE / 3, startY + row * SQUARE_SIZE + SQUARE_SIZE / 1.5);
                 }
             }
         }
-    }
-
-    if (!gameStarted && !gameResult) {
+    } else {
         ctx.fillStyle = 'blue';
         ctx.fillRect(WIDTH / 5, HEIGHT / 3, 200, 100);
         ctx.strokeStyle = 'lightblue';
@@ -60,8 +60,6 @@ function drawGrid() {
 
         ctx.fillStyle = 'white';
         ctx.font = '20px Comic Sans MS';
-
-        ctx.textBaseline = 'middle';
         ctx.fillText('Play with computer', WIDTH / 5 + 15, HEIGHT / 3 + 55);
         ctx.fillText('2 Players Game', WIDTH / 2 + 25, HEIGHT / 3 + 55);
         ctx.fillText('Please select an option to play', WIDTH / 3.25, HEIGHT / 6);
@@ -227,7 +225,7 @@ canvas.addEventListener('mousedown', (event) => {
 
 function gameLoop() {
     const currentTime = performance.now();
-    if (option1 && !isPlayerTurn && currentTime - computerMoveTime > 1000) {
+    if (pendingComputerMove && !isPlayerTurn && currentTime - computerMoveTime > 1000) {
         computerMove();
         pendingComputerMove = false;
         if (checkWinner()) {

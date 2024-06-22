@@ -9,8 +9,10 @@ let squares = [['', '', ''], ['', '', ''], ['', '', '']];
 let gameOverMessage = '';
 let computerMoveTime = 0;
 let pendingComputerMove = false;
-let option1 = false;
-let option2 = false;
+/*
+let option1 = False;
+let option2 = False;
+*/
 
 const WIDTH = 800, HEIGHT = 600;
 const ROWS = 3;
@@ -24,8 +26,10 @@ function resetGame() {
     isPlayerTurn = Math.random() < 0.5;
     squares = [['', '', ''], ['', '', ''], ['', '', '']];
     gameOverMessage = '';
-    option1 = false;
-    option2 = false;
+    /*
+    option1 = False;
+    option2 = False;
+    */
 }
 
 function drawGrid() {
@@ -48,9 +52,7 @@ function drawGrid() {
                 }
             }
         }
-    }
-
-    if (!gameStarted && !gameResult) {
+    } else {
         ctx.fillStyle = 'blue';
         ctx.fillRect(WIDTH / 5, HEIGHT / 3, 200, 100);
         ctx.strokeStyle = 'lightblue';
@@ -60,8 +62,6 @@ function drawGrid() {
 
         ctx.fillStyle = 'white';
         ctx.font = '20px Comic Sans MS';
-
-        ctx.textBaseline = 'middle';
         ctx.fillText('Play with computer', WIDTH / 5 + 15, HEIGHT / 3 + 55);
         ctx.fillText('2 Players Game', WIDTH / 2 + 25, HEIGHT / 3 + 55);
         ctx.fillText('Please select an option to play', WIDTH / 3.25, HEIGHT / 6);
@@ -75,12 +75,13 @@ function drawGrid() {
 
         ctx.fillStyle = 'white';
         ctx.font = '20px Comic Sans MS';
-        /*ctx.fillText(gameStarted && isPlayerTurn ? "Player's Turn" : "Computer's Turn", WIDTH / 3.25, HEIGHT / 6);*/
+        ctx.fillText(gameStarted && isPlayerTurn ? "Player's Turn" : "Computer's Turn", WIDTH / 3.25, HEIGHT / 6);
+        /*
         if (option1) {
             ctx.fillText(gameStarted && isPlayerTurn ? "Player's Turn" : "Computer's Turn", WIDTH / 3.25, HEIGHT / 6);
         } else if (option2) {
             ctx.fillText(gameStarted && isPlayerTurn ? "Player 1's Turn" : "Player 2's Turn", WIDTH / 3.25, HEIGHT / 6);
-        }
+        }*/
     }
 }
 
@@ -210,11 +211,11 @@ canvas.addEventListener('mousedown', (event) => {
     if (!gameStarted && !gameResult) {
         if (mouseX >= WIDTH / 5 && mouseX <= WIDTH / 5 + 200 && mouseY >= HEIGHT / 3 && mouseY <= HEIGHT / 3 + 100) {
             gameStarted = true;
-            option1 = true;
+            /*option1 = true;*/
             isPlayerTurn = Math.random() < 0.5;
         } else if (mouseX >= WIDTH / 2 && mouseX <= WIDTH / 2 + 200 && mouseY >= HEIGHT / 3 && mouseY <= HEIGHT / 3 + 100) {
             gameStarted = true;
-            option2 = true;
+            /*option2 = true;*/
             isPlayerTurn = true;
         }
     } else if (gameStarted) {
@@ -227,7 +228,7 @@ canvas.addEventListener('mousedown', (event) => {
 
 function gameLoop() {
     const currentTime = performance.now();
-    if (option1 && !isPlayerTurn && currentTime - computerMoveTime > 1000) {
+    if (pendingComputerMove && !isPlayerTurn && currentTime - computerMoveTime > 1000) {
         computerMove();
         pendingComputerMove = false;
         if (checkWinner()) {

@@ -60,8 +60,6 @@ function drawGrid() {
 
         ctx.fillStyle = 'white';
         ctx.font = '20px Comic Sans MS';
-
-        ctx.textBaseline = 'middle';
         ctx.fillText('Play with computer', WIDTH / 5 + 15, HEIGHT / 3 + 55);
         ctx.fillText('2 Players Game', WIDTH / 2 + 25, HEIGHT / 3 + 55);
         ctx.fillText('Please select an option to play', WIDTH / 3.25, HEIGHT / 6);

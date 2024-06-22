@@ -9,10 +9,7 @@ let squares = [['', '', ''], ['', '', ''], ['', '', '']];
 let gameOverMessage = '';
 let computerMoveTime = 0;
 let pendingComputerMove = false;
-let option1 = false;
-let option2 = false;
 
-const WIDTH = 800, HEIGHT = 600;
 const ROWS = 3;
 const COLS = 3;
 const SQUARE_SIZE = 100;
@@ -24,71 +21,59 @@ function resetGame() {
     isPlayerTurn = Math.random() < 0.5;
     squares = [['', '', ''], ['', '', ''], ['', '', '']];
     gameOverMessage = '';
-    option1 = false;
-    option2 = false;
 }
 
 function drawGrid() {
     ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.fillRect(0, 0, 800, 600);
 
-    const startX = (WIDTH - COLS * SQUARE_SIZE) / 2;
-    const startY = (HEIGHT - ROWS * SQUARE_SIZE) / 2;
+    const startX = (800 - 3 * 100) / 2;
+    const startY = (600 - 3 * 100) / 2;
 
     if (gameStarted) {
-        for (let row = 0; row < ROWS; row++) {
-            for (let col = 0; col < COLS; col++) {
+        for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 3; col++) {
                 ctx.strokeStyle = 'white';
-                ctx.strokeRect(startX + col * SQUARE_SIZE, startY + row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+                ctx.strokeRect(startX + col * 100, startY + row * 100, 100, 100);
 
                 if (squares[row][col] !== '') {
                     ctx.fillStyle = squares[row][col] === 'X' ? 'green' : 'blue';
                     ctx.font = '48px sans-serif';
-                    ctx.fillText(squares[row][col], startX + col * SQUARE_SIZE + SQUARE_SIZE / 3, startY + row * SQUARE_SIZE + SQUARE_SIZE / 1.5);
+                    ctx.fillText(squares[row][col], startX + col * 100 + 33, startY + row * 100 + 67);
                 }
             }
         }
-    }
-
-    if (!gameStarted && !gameResult) {
+    } else {
         ctx.fillStyle = 'blue';
-        ctx.fillRect(WIDTH / 5, HEIGHT / 3, 200, 100);
+        ctx.fillRect(800 / 5, 600 / 3, 200, 100);
         ctx.strokeStyle = 'lightblue';
-        ctx.strokeRect(WIDTH / 5, HEIGHT / 3, 200, 100);
-        ctx.fillRect(WIDTH / 2, HEIGHT / 3, 200, 100);
-        ctx.strokeRect(WIDTH / 2, HEIGHT / 3, 200, 100);
+        ctx.strokeRect(800 / 5, 600 / 3, 200, 100);
+        ctx.fillRect(800 / 2, 600 / 3, 200, 100);
+        ctx.strokeRect(800 / 2, 600 / 3, 200, 100);
 
         ctx.fillStyle = 'white';
         ctx.font = '20px Comic Sans MS';
-
-        ctx.textBaseline = 'middle';
-        ctx.fillText('Play with computer', WIDTH / 5 + 15, HEIGHT / 3 + 55);
-        ctx.fillText('2 Players Game', WIDTH / 2 + 25, HEIGHT / 3 + 55);
-        ctx.fillText('Please select an option to play', WIDTH / 3.25, HEIGHT / 6);
+        ctx.fillText('Play with computer', 800 / 5 + 100, 600 / 3 + 50);
+        ctx.fillText('2 Players Game', 800 / 2 + 100, 600 / 3 + 50);
+        ctx.fillText('Please select an option to play', 800 / 2, 600 / 6);
     }
 
     if (gameOverMessage) {
         ctx.fillStyle = 'green';
         ctx.font = '48px sans-serif';
-        ctx.fillText(gameOverMessage, WIDTH / 2, HEIGHT / 2);
+        ctx.fillText(gameOverMessage, 800 / 2, 600 / 2);
     } else if (gameStarted) {
-
         ctx.fillStyle = 'white';
         ctx.font = '20px Comic Sans MS';
-        /*ctx.fillText(gameStarted && isPlayerTurn ? "Player's Turn" : "Computer's Turn", WIDTH / 3.25, HEIGHT / 6);*/
-        if (option1) {
-            ctx.fillText(gameStarted && isPlayerTurn ? "Player's Turn" : "Computer's Turn", WIDTH / 3.25, HEIGHT / 6);
-        } else if (option2) {
-            ctx.fillText(gameStarted && isPlayerTurn ? "Player 1's Turn" : "Player 2's Turn", WIDTH / 3.25, HEIGHT / 6);
-        }
+        ctx.fillText(gameStarted && isPlayerTurn ? "Player's Turn" : "Computer's Turn", 800 / 2, 600 / 6);
     }
 }
 
 function getGridPosition(x, y) {
     const totalGridWidth = COLS * SQUARE_SIZE;
     const totalGridHeight = ROWS * SQUARE_SIZE;
-    const startX = (WIDTH - totalGridWidth) / 2;
-    const startY = (HEIGHT - totalGridHeight) / 2;
+    const startX = (800 - totalGridWidth) / 2;
+    const startY = (600 - totalGridHeight) / 2;
 
     if (startX <= x <= startX + totalGridWidth && startY <= y <= startY + totalGridHeight) {
         const col = Math.floor((x - startX) / SQUARE_SIZE);
@@ -208,13 +193,11 @@ canvas.addEventListener('mousedown', (event) => {
     const mouseY = event.clientY - rect.top;
 
     if (!gameStarted && !gameResult) {
-        if (mouseX >= WIDTH / 5 && mouseX <= WIDTH / 5 + 200 && mouseY >= HEIGHT / 3 && mouseY <= HEIGHT / 3 + 100) {
+        if (mouseX >= 800 / 5 && mouseX <= 800 / 5 + 200 && mouseY >= 600 / 3 && mouseY <= 600 / 3 + 100) {
             gameStarted = true;
-            option1 = true;
             isPlayerTurn = Math.random() < 0.5;
-        } else if (mouseX >= WIDTH / 2 && mouseX <= WIDTH / 2 + 200 && mouseY >= HEIGHT / 3 && mouseY <= HEIGHT / 3 + 100) {
+        } else if (mouseX >= 800 / 2 && mouseX <= 800 / 2 + 200 && mouseY >= 600 / 3 && mouseY <= 600 / 3 + 100) {
             gameStarted = true;
-            option2 = true;
             isPlayerTurn = true;
         }
     } else if (gameStarted) {
@@ -227,7 +210,7 @@ canvas.addEventListener('mousedown', (event) => {
 
 function gameLoop() {
     const currentTime = performance.now();
-    if (option1 && !isPlayerTurn && currentTime - computerMoveTime > 1000) {
+    if (pendingComputerMove && !isPlayerTurn && currentTime - computerMoveTime > 1000) {
         computerMove();
         pendingComputerMove = false;
         if (checkWinner()) {
