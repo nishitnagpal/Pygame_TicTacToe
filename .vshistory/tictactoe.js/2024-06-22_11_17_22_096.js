@@ -28,30 +28,35 @@ function drawGrid() {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-    const startX = (WIDTH - COLS * SQUARE_SIZE) / 2;
-    const startY = (HEIGHT - ROWS * SQUARE_SIZE) / 2;
+    const startX = (WIDTH - 3 * 100) / 2;
+    const startY = (HEIGHT - 3 * 100) / 2;
 
     if (gameStarted) {
-        for (let row = 0; row < ROWS; row++) {
-            for (let col = 0; col < COLS; col++) {
+        for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 3; col++) {
                 ctx.strokeStyle = 'white';
-                ctx.strokeRect(startX + col * SQUARE_SIZE, startY + row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+                ctx.strokeRect(startX + col * 100, startY + row * 100, 100, 100);
 
                 if (squares[row][col] !== '') {
                     ctx.fillStyle = squares[row][col] === 'X' ? 'green' : 'blue';
                     ctx.font = '48px sans-serif';
-                    ctx.fillText(squares[row][col], startX + col * SQUARE_SIZE + SQUARE_SIZE / 3, startY + row * SQUARE_SIZE + SQUARE_SIZE / 1.5);
+                    ctx.fillText(squares[row][col], startX + col * 100 + 33, startY + row * 100 + 67);
                 }
             }
         }
-    }
+    } else {
+        ctx.fillStyle = 'blue';
+        ctx.fillRect(WIDTH / 5, HEIGHT / 3, 200, 100);
+        ctx.strokeStyle = 'lightblue';
+        ctx.strokeRect(WIDTH / 5, HEIGHT / 3, 200, 100);
+        ctx.fillRect(WIDTH / 2, HEIGHT / 3, 200, 100);
+        ctx.strokeRect(WIDTH / 2, HEIGHT / 3, 200, 100);
 
-    if (!gameStarted && !gameResult) {
-
-        drawOptionButton(WIDTH / 5, HEIGHT / 3, "Play with computer");
-        drawOptionButton(WIDTH / 2, HEIGHT / 3, "2 Players Game");
-
-        drawText("Please select an option to play", WIDTH / 2, HEIGHT / 6, WHITE, "20px Comic Sans MS");
+        ctx.fillStyle = 'white';
+        ctx.font = '20px Comic Sans MS';
+        ctx.fillText('Play with computer', WIDTH / 5 + 100, HEIGHT / 3 + 50);
+        ctx.fillText('2 Players Game', WIDTH / 2 + 100, HEIGHT / 3 + 50);
+        ctx.fillText('Please select an option to play', WIDTH / 2, HEIGHT / 6);
     }
 
     if (gameOverMessage) {
@@ -63,22 +68,6 @@ function drawGrid() {
         ctx.font = '20px Comic Sans MS';
         ctx.fillText(gameStarted && isPlayerTurn ? "Player's Turn" : "Computer's Turn", WIDTH / 2, HEIGHT / 6);
     }
-}
-
-function drawOptionButton(x, y, text) {
-    ctx.fillStyle = 'blue';
-    ctx.fillRect(x, y, 200, 100);
-    ctx.strokeStyle = 'lightblue';
-    ctx.strokeRect(x, y, 200, 100);
-
-    drawText(text, x + 100, y + 50, 'white', "20px Comic Sans MS");
-}
-
-function drawText(text, x, y, color, font) {
-    ctx.fillStyle = color;
-    ctx.font = font;
-    ctx.textAlign = 'center';
-    ctx.fillText(text, x, y);
 }
 
 function getGridPosition(x, y) {
